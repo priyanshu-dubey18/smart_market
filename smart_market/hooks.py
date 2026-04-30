@@ -10,6 +10,9 @@ app_license = "mit"
 
 # required_apps = []
 
+
+fixtures = ["Custom Field", "Property Setter","Custom Field", "Item", "Client Script", "Server Script",]
+
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
 # 	{
