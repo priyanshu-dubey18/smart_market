@@ -32,8 +32,8 @@ fixtures = ["Custom Field", "Property Setter","Custom Field", "Item", "Client Sc
 # app_include_js = "/assets/smart_market/js/smart_market.js"
 
 # include js, css files in header of web template
-# web_include_css = "/assets/smart_market/css/smart_market.css"
-# web_include_js = "/assets/smart_market/js/smart_market.js"
+web_include_css = "/assets/smart_market/css/smart_market.css"
+web_include_js = "/assets/smart_market/js/smart_market.js"
 
 # include custom scss in every website theme (without file extension ".scss")
 # website_theme_scss = "smart_market/public/scss/website"

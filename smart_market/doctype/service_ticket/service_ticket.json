@@ -18,7 +18,8 @@
   "total_cost",
   "technician",
   "section_break_izra",
-  "used_parts"
+  "used_parts",
+  "amended_from"
  ],
  "fields": [
   {
@@ -99,12 +100,23 @@
    "fieldtype": "Link",
    "label": "Sales Invoice",
    "options": "Sales Invoice"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Service Ticket",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-04-27 15:54:38.296542",
+ "modified": "2026-05-05 12:28:05.809807",
  "modified_by": "Administrator",
  "module": "Smart Market",
  "name": "Service Ticket",

@@ -20,7 +20,7 @@ frappe.ui.form.on('Service Ticket', {
             frappe.db.get_doc('Machine', frm.doc.machine).then(doc => {
                 let today = frappe.datetime.get_today();
 
-                if (doc.warranty_expiry >= today) {
+                if (doc.warranty_date >= today) {
                     frappe.msgprint("Under Warranty ✅");
                 } else {
                     frappe.msgprint("Out of Warranty ❌");

@@ -32,24 +32,25 @@ async function submitServiceRequest() {
   isSubmitting.value = true
 
   try {
-    const response = await fetch('/api/resource/Service Ticket', {
+    const response = await fetch('/api/method/smart_market.api.create_service_ticket', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        customer: customer.value,
-        machine: machine.value,
+        customer_name: customer.value,
+        machine_name: machine.value,
         issue_description: issueDescription.value,
       }),
     })
 
-    // Frappe returns an error response if the request fails
-    if (!response.ok) {
-      throw new Error('Failed to submit service request')
+    const result = await response.json()
+
+    if (!response.ok || !result.message.success) {
+      throw new Error(result.message.message || 'Failed to submit service request')
     }
 
-    successMessage.value = 'Service Request Submitted'
+    successMessage.value = 'Service Request Submitted Successfully! Ticket ID: ' + result.message.ticket_id
     clearForm()
   } catch (error) {
     errorMessage.value = error.message
