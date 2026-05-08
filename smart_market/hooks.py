@@ -60,7 +60,7 @@ web_include_js = "/assets/smart_market/js/smart_market.js"
 # ----------
 
 # application home page (will override Website Settings)
-# home_page = "login"
+home_page = "sm-auth"
 
 # website user home page (by Role)
 # role_home_page = {
@@ -89,7 +89,7 @@ web_include_js = "/assets/smart_market/js/smart_market.js"
 # ------------
 
 # before_install = "smart_market.install.before_install"
-# after_install = "smart_market.install.after_install"
+after_install = "smart_market.setup.demo_data.create_demo_data"
 
 # Uninstallation
 # ------------

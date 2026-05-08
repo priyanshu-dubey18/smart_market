@@ -1,38 +1,43 @@
-<template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link> |
-    <router-link to="/service-request">Service Request</router-link>
-  </nav>
+<script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 
-  <router-view />
+const route = useRoute()
+
+// Auth pages and Home handle their own navbar — no global nav needed
+const hideNav = computed(() => {
+  const noNavRoutes = ['Home', 'SignUpChoice', 'CustomerSignUp', 'VendorSignUp',
+    'OTPVerify', 'SetCredentials', 'SignIn',
+    'ResetEmail', 'ResetEmailSet', 'ResetPassword', 'ResetPasswordSet']
+  return noNavRoutes.includes(route.name)
+})
+</script>
+
+<template>
+  <div>
+    <nav v-if="!hideNav" class="global-nav">
+      <router-link to="/">Home</router-link> |
+      <router-link to="/service-request">Service Request</router-link> |
+      <router-link to="/about">About</router-link>
+    </nav>
+    <router-view />
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
+.global-nav {
+  background: rgba(15,23,42,0.95);
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid rgba(99,102,241,0.15);
+  font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size: 0.9rem;
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.global-nav a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
 }
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
+.global-nav a:hover,
+.global-nav a.router-link-active { color: #a5b4fc; }
 </style>

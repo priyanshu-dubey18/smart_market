@@ -1,6 +1,8 @@
 # Copyright (c) 2026, dev_priyanshu dubey and contributors
 # For license information, please see license.txt
 
+from pydoc import doc
+
 import frappe
 from frappe.model.document import Document
 from frappe.utils import add_days
@@ -28,7 +30,7 @@ class ServiceTicket(Document):
 
             for d in self.used_parts:
                 items.append({
-                    "item_code": d.part,
+                    "item_code": d.item,
                     "qty": d.qty,
                     "rate": d.rate
                 })

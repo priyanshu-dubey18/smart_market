@@ -1,0 +1,1243 @@
+{% extends "templates/web.html" %}
+{% block title %}Smart Market - Welcome{% endblock %}
+
+{% block head_include %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+	--primary:       #6c63ff;
+	--secondary:     #00d4ff;
+	--accent:        #ff6b9d;
+	--bg:            #080816;
+	--surface:       rgba(15, 14, 35, 0.85);
+	--border:        rgba(108, 99, 255, 0.18);
+	--text:          #e8e6ff;
+	--text-dim:      rgba(232, 230, 255, 0.45);
+	--error:         #ff4d6d;
+	--success:       #00f5a0;
+	--gradient:      linear-gradient(135deg, #6c63ff 0%, #00d4ff 100%);
+	--gradient-warm: linear-gradient(135deg, #6c63ff 0%, #ff6b9d 100%);
+	--glow-primary:  0 0 32px rgba(108, 99, 255, 0.35);
+}
+
+html, body {
+	min-height: 100vh;
+	background: var(--bg);
+	color: var(--text);
+	font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+	overflow-x: hidden;
+}
+
+/* ========== ANIMATED BACKGROUND ========== */
+#sm-canvas {
+	position: fixed;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 0;
+	pointer-events: none;
+}
+
+.sm-orb {
+	position: fixed;
+	border-radius: 50%;
+	filter: blur(100px);
+	opacity: 0.12;
+	pointer-events: none;
+	z-index: 0;
+	animation: orbDrift 12s ease-in-out infinite alternate;
+}
+.sm-orb-1 { width: 600px; height: 600px; background: #6c63ff; top: -200px; left: -200px; }
+.sm-orb-2 { width: 500px; height: 500px; background: #00d4ff; bottom: -150px; right: -150px; animation-delay: -6s; }
+.sm-orb-3 { width: 300px; height: 300px; background: #ff6b9d; top: 40%; left: 40%; animation-delay: -3s; opacity: 0.06; }
+
+@keyframes orbDrift {
+	from { transform: translate(0, 0) scale(1); }
+	to   { transform: translate(60px, 40px) scale(1.15); }
+}
+
+/* ========== LAYOUT ========== */
+.sm-wrap {
+	position: relative;
+	z-index: 1;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 24px 16px;
+}
+
+/* ========== VIEWS ========== */
+.sm-view {
+	display: none;
+	width: 100%;
+	max-width: 460px;
+}
+.sm-view.active {
+	display: block;
+	animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes slideUp {
+	from { opacity: 0; transform: translateY(32px) scale(0.97); }
+	to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ========== CARD ========== */
+.sm-card {
+	background: var(--surface);
+	backdrop-filter: blur(24px) saturate(180%);
+	-webkit-backdrop-filter: blur(24px) saturate(180%);
+	border: 1px solid var(--border);
+	border-radius: 28px;
+	padding: 40px 36px;
+	box-shadow:
+		0 32px 64px rgba(0, 0, 0, 0.6),
+		0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+		0 1px 0 rgba(255, 255, 255, 0.08) inset;
+}
+
+/* ========== BRAND ========== */
+.sm-brand {
+	text-align: center;
+	margin-bottom: 36px;
+}
+.sm-logo-wrap {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 72px;
+	height: 72px;
+	background: var(--gradient);
+	border-radius: 22px;
+	font-size: 32px;
+	margin-bottom: 18px;
+	box-shadow: var(--glow-primary), 0 8px 32px rgba(108, 99, 255, 0.3);
+	position: relative;
+	overflow: hidden;
+}
+.sm-logo-wrap::after {
+	content: '';
+	position: absolute;
+	top: -50%;
+	left: -50%;
+	width: 200%;
+	height: 200%;
+	background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+	animation: logoShine 4s ease-in-out infinite;
+}
+@keyframes logoShine {
+	0%, 100% { transform: translateX(-100%) rotate(0deg); }
+	50% { transform: translateX(50%) rotate(10deg); }
+}
+.sm-brand h1 {
+	font-size: 26px;
+	font-weight: 700;
+	background: var(--gradient);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	letter-spacing: -0.5px;
+	margin-bottom: 6px;
+}
+.sm-brand p {
+	color: var(--text-dim);
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+/* ========== BUTTONS ========== */
+.sm-btn {
+	width: 100%;
+	padding: 15px 24px;
+	border: none;
+	border-radius: 14px;
+	font-size: 15px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+	position: relative;
+	overflow: hidden;
+	letter-spacing: 0.2px;
+}
+.sm-btn + .sm-btn { margin-top: 12px; }
+
+.sm-btn::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: rgba(255,255,255,0);
+	transition: background 0.3s;
+}
+.sm-btn:hover::after { background: rgba(255,255,255,0.07); }
+.sm-btn:active { transform: scale(0.98); }
+
+.sm-btn-primary {
+	background: var(--gradient);
+	color: white;
+	box-shadow: 0 8px 24px rgba(108, 99, 255, 0.4), 0 1px 0 rgba(255,255,255,0.15) inset;
+}
+.sm-btn-primary:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 14px 36px rgba(108, 99, 255, 0.55), 0 1px 0 rgba(255,255,255,0.15) inset;
+}
+
+.sm-btn-outline {
+	background: rgba(255, 255, 255, 0.04);
+	color: var(--text);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.sm-btn-outline:hover {
+	transform: translateY(-2px);
+	border-color: rgba(108, 99, 255, 0.4);
+	background: rgba(108, 99, 255, 0.08);
+	box-shadow: 0 8px 24px rgba(108, 99, 255, 0.15);
+}
+
+/* Loading state */
+.sm-btn.loading { pointer-events: none; }
+.sm-btn.loading .btn-text { opacity: 0; }
+.sm-btn.loading::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.sm-btn.loading::after {
+	content: '';
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	border: 2.5px solid rgba(255,255,255,0.3);
+	border-top-color: white;
+	border-radius: 50%;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+/* ========== LANDING BUTTONS ========== */
+.sm-landing-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 14px;
+}
+.sm-landing-trust {
+	margin-top: 24px;
+	padding: 14px 16px;
+	background: rgba(255,255,255,0.025);
+	border: 1px solid rgba(255,255,255,0.05);
+	border-radius: 12px;
+	text-align: center;
+}
+.sm-landing-trust p {
+	font-size: 12px;
+	color: rgba(255,255,255,0.3);
+}
+.sm-trust-badges {
+	display: flex;
+	justify-content: center;
+	gap: 16px;
+	margin-top: 8px;
+}
+.sm-trust-badges span {
+	font-size: 11px;
+	color: var(--text-dim);
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+/* ========== ROLE CARDS ========== */
+.sm-role-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 14px;
+	margin-bottom: 8px;
+}
+.sm-role-card {
+	padding: 28px 12px 20px;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 20px;
+	background: rgba(255,255,255,0.025);
+	cursor: pointer;
+	transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+	text-align: center;
+	position: relative;
+	overflow: hidden;
+}
+.sm-role-card::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: var(--gradient);
+	opacity: 0;
+	transition: opacity 0.3s;
+}
+.sm-role-card:hover {
+	border-color: var(--primary);
+	transform: translateY(-6px);
+	box-shadow: 0 16px 40px rgba(108, 99, 255, 0.25);
+}
+.sm-role-card:hover::before { opacity: 0.05; }
+.sm-role-card .role-icon {
+	font-size: 44px;
+	display: block;
+	margin-bottom: 12px;
+	position: relative;
+	z-index: 1;
+	filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+.sm-role-card .role-title {
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--text);
+	position: relative;
+	z-index: 1;
+}
+.sm-role-card .role-desc {
+	font-size: 11px;
+	color: var(--text-dim);
+	margin-top: 4px;
+	position: relative;
+	z-index: 1;
+}
+
+/* ========== FORM ========== */
+.sm-form-group { margin-bottom: 20px; }
+.sm-form-group label {
+	display: block;
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--text-dim);
+	margin-bottom: 8px;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+}
+.sm-input-wrap { position: relative; }
+.sm-input {
+	width: 100%;
+	padding: 14px 18px;
+	background: rgba(255,255,255,0.04);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 12px;
+	color: var(--text);
+	font-size: 15px;
+	transition: all 0.3s ease;
+	outline: none;
+	-webkit-appearance: none;
+}
+.sm-input:focus {
+	border-color: var(--primary);
+	background: rgba(108, 99, 255, 0.07);
+	box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+}
+.sm-input::placeholder { color: rgba(255,255,255,0.18); }
+.sm-input.has-icon { padding-right: 48px; }
+
+.sm-input-icon {
+	position: absolute;
+	right: 14px;
+	top: 50%;
+	transform: translateY(-50%);
+	background: none;
+	border: none;
+	color: var(--text-dim);
+	cursor: pointer;
+	font-size: 17px;
+	transition: color 0.3s;
+	padding: 4px;
+	display: flex;
+	align-items: center;
+}
+.sm-input-icon:hover { color: var(--text); }
+
+/* Password strength bar */
+.sm-strength-wrap {
+	margin-top: 7px;
+	height: 3px;
+	background: rgba(255,255,255,0.06);
+	border-radius: 2px;
+	overflow: hidden;
+}
+.sm-strength-bar {
+	height: 100%;
+	border-radius: 2px;
+	width: 0;
+	transition: width 0.4s ease, background 0.4s ease;
+}
+
+/* ========== OTP INPUTS ========== */
+.sm-otp-grid {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 10px;
+	margin-bottom: 24px;
+}
+.sm-otp-digit {
+	aspect-ratio: 1;
+	text-align: center;
+	font-size: 22px;
+	font-weight: 700;
+	background: rgba(255,255,255,0.04);
+	border: 1px solid rgba(255,255,255,0.08);
+	border-radius: 14px;
+	color: white;
+	outline: none;
+	transition: all 0.25s ease;
+	padding: 0;
+	-webkit-appearance: none;
+	caret-color: var(--primary);
+}
+.sm-otp-digit:focus {
+	border-color: var(--primary);
+	background: rgba(108, 99, 255, 0.1);
+	box-shadow: 0 0 0 3px rgba(108,99,255,0.18);
+	transform: scale(1.06);
+}
+.sm-otp-digit.filled {
+	border-color: var(--secondary);
+	background: rgba(0, 212, 255, 0.07);
+	color: var(--secondary);
+}
+
+/* ========== ALERT ========== */
+.sm-alert {
+	padding: 12px 14px;
+	border-radius: 10px;
+	font-size: 13px;
+	margin-bottom: 20px;
+	display: none;
+	line-height: 1.5;
+	animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.sm-alert.error {
+	display: block;
+	background: rgba(255, 77, 109, 0.1);
+	border: 1px solid rgba(255, 77, 109, 0.25);
+	color: #ff8fa3;
+}
+.sm-alert.success {
+	display: block;
+	background: rgba(0, 245, 160, 0.08);
+	border: 1px solid rgba(0, 245, 160, 0.25);
+	color: #00f5a0;
+}
+
+/* ========== PROGRESS DOTS ========== */
+.sm-progress {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 30px;
+}
+.sm-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.12);
+	transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sm-dot.active {
+	background: var(--primary);
+	width: 24px;
+	border-radius: 4px;
+	box-shadow: 0 0 12px rgba(108,99,255,0.6);
+}
+.sm-dot.done {
+	background: var(--success);
+	box-shadow: 0 0 8px rgba(0,245,160,0.4);
+}
+
+/* ========== BACK BUTTON ========== */
+.sm-back {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--text-dim);
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	margin-bottom: 24px;
+	background: none;
+	border: none;
+	transition: color 0.3s;
+	padding: 0;
+}
+.sm-back:hover { color: var(--text); }
+
+/* ========== TIMER ========== */
+.sm-timer-wrap {
+	text-align: center;
+	margin-top: 18px;
+}
+.sm-timer-wrap p {
+	font-size: 13px;
+	color: var(--text-dim);
+}
+.sm-timer-wrap #otp-timer { color: var(--secondary); font-weight: 600; }
+.sm-resend-btn {
+	background: none;
+	border: none;
+	color: var(--secondary);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	display: none;
+	margin: 0 auto;
+	padding: 4px 8px;
+}
+.sm-resend-btn:hover { text-decoration: underline; }
+
+/* ========== DIVIDER ========== */
+.sm-divider {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 22px 0;
+	color: var(--text-dim);
+	font-size: 12px;
+}
+.sm-divider::before, .sm-divider::after {
+	content: '';
+	flex: 1;
+	height: 1px;
+	background: rgba(255,255,255,0.06);
+}
+
+/* ========== SWITCH LINK ========== */
+.sm-switch {
+	text-align: center;
+	font-size: 13px;
+	color: var(--text-dim);
+	margin-top: 20px;
+}
+.sm-switch a {
+	color: var(--secondary);
+	cursor: pointer;
+	font-weight: 600;
+	text-decoration: none;
+}
+.sm-switch a:hover { text-decoration: underline; }
+
+/* ========== VENDOR INFO BOX ========== */
+.sm-info-box {
+	padding: 14px 16px;
+	background: rgba(108, 99, 255, 0.06);
+	border: 1px solid rgba(108, 99, 255, 0.18);
+	border-radius: 12px;
+	margin-bottom: 24px;
+	font-size: 13px;
+	color: rgba(255,255,255,0.55);
+	line-height: 1.6;
+}
+
+/* ========== SUCCESS VIEW ========== */
+.sm-success-wrap { text-align: center; }
+.sm-success-icon {
+	width: 88px;
+	height: 88px;
+	background: rgba(0,245,160,0.08);
+	border: 2px solid rgba(0,245,160,0.25);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 40px;
+	margin: 0 auto 24px;
+	animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes popIn {
+	0% { transform: scale(0); opacity: 0; }
+	60% { transform: scale(1.1); }
+	100% { transform: scale(1); opacity: 1; }
+}
+.sm-success-title {
+	font-size: 26px;
+	font-weight: 700;
+	margin-bottom: 8px;
+	background: var(--gradient);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+.sm-success-msg {
+	color: var(--text-dim);
+	font-size: 14px;
+	margin-bottom: 32px;
+	line-height: 1.6;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 480px) {
+	.sm-card { padding: 28px 20px; border-radius: 22px; }
+	.sm-brand h1 { font-size: 22px; }
+	.sm-role-grid { gap: 10px; }
+	.sm-otp-grid { gap: 7px; }
+	.sm-otp-digit { font-size: 18px; }
+	.sm-landing-grid { gap: 10px; }
+}
+
+/* Hide Frappe navbar/footer on this page */
+header.navbar, .web-header, nav.navbar, footer.web-footer,
+.footer-subscribe, #footer-subscribe, .web-footer,
+.container > .row.border-top { display: none !important; }
+body { padding-top: 0 !important; }
+</style>
+{% endblock %}
+
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block page_content %}
+<!-- Ambient Background -->
+<div class="sm-orb sm-orb-1"></div>
+<div class="sm-orb sm-orb-2"></div>
+<div class="sm-orb sm-orb-3"></div>
+<canvas id="sm-canvas"></canvas>
+
+<div class="sm-wrap">
+
+	<!-- ===== VIEW: LANDING ===== -->
+	<div class="sm-view active" id="view-landing">
+		<div class="sm-card">
+			<div class="sm-brand">
+				<div class="sm-logo-wrap">🛒</div>
+				<h1>Smart Market</h1>
+				<p>Your next-generation marketplace platform.<br>Join thousands of customers & vendors.</p>
+			</div>
+
+			<div class="sm-landing-grid">
+				<button class="sm-btn sm-btn-primary" onclick="smShowRoleSelect('signup')">
+					<span class="btn-text">✨ Create Account</span>
+				</button>
+				<button class="sm-btn sm-btn-outline" onclick="smShowRoleSelect('signin')">
+					<span class="btn-text">Sign In →</span>
+				</button>
+			</div>
+
+			<div class="sm-landing-trust">
+				<p>Trusted by businesses and customers</p>
+				<div class="sm-trust-badges">
+					<span>🔒 Secure</span>
+					<span>⚡ Fast</span>
+					<span>✅ Verified</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- ===== VIEW: ROLE SELECT ===== -->
+	<div class="sm-view" id="view-role-select">
+		<div class="sm-card">
+			<button class="sm-back" onclick="smGoto('view-landing')">← Back</button>
+			<div class="sm-brand">
+				<h1 id="role-title">Choose Your Role</h1>
+				<p id="role-subtitle">Select how you want to access Smart Market</p>
+			</div>
+			<div class="sm-role-grid">
+				<div class="sm-role-card" onclick="smChooseRole('customer')">
+					<span class="role-icon">👤</span>
+					<div class="role-title">Customer</div>
+					<div class="role-desc">Shop & place orders</div>
+				</div>
+				<div class="sm-role-card" onclick="smChooseRole('vendor')">
+					<span class="role-icon">🏪</span>
+					<div class="role-title">Vendor</div>
+					<div class="role-desc">Sell & manage store</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- ===== VIEW: CUSTOMER SIGNUP ===== -->
+	<div class="sm-view" id="view-customer-signup">
+		<div class="sm-card">
+			<button class="sm-back" onclick="smGoto('view-role-select')">← Back</button>
+			<div class="sm-progress">
+				<div class="sm-dot active"></div>
+				<div class="sm-dot"></div>
+				<div class="sm-dot"></div>
+			</div>
+			<div class="sm-brand">
+				<h1>Create Account</h1>
+				<p>Fill in your details to get started</p>
+			</div>
+			<div id="alert-c-signup" class="sm-alert"></div>
+			<div class="sm-form-group">
+				<label>Full Name</label>
+				<input class="sm-input" type="text" id="c-fullname" placeholder="Rahul Sharma" autocomplete="name">
+			</div>
+			<div class="sm-form-group">
+				<label>Email Address</label>
+				<input class="sm-input" type="email" id="c-email" placeholder="rahul@example.com" autocomplete="email">
+			</div>
+			<div class="sm-form-group">
+				<label>Phone Number</label>
+				<input class="sm-input" type="tel" id="c-phone" placeholder="+91 99999 99999" autocomplete="tel">
+			</div>
+			<div class="sm-form-group">
+				<label>Password</label>
+				<div class="sm-input-wrap">
+					<input class="sm-input has-icon" type="password" id="c-password"
+					       placeholder="Min 6 characters" autocomplete="new-password"
+					       oninput="smStrength(this, 'c-sbar')">
+					<button class="sm-input-icon" type="button" onclick="smTogglePass(this)" tabindex="-1">
+						<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+					</button>
+				</div>
+				<div class="sm-strength-wrap"><div class="sm-strength-bar" id="c-sbar"></div></div>
+			</div>
+			<button class="sm-btn sm-btn-primary" id="btn-c-signup" onclick="smCustomerSignup()">
+				<span class="btn-text">Send OTP & Continue →</span>
+			</button>
+			<div class="sm-switch">Already registered? <a onclick="smGotoSignin('customer')">Sign In</a></div>
+		</div>
+	</div>
+
+	<!-- ===== VIEW: OTP VERIFY ===== -->
+	<div class="sm-view" id="view-otp">
+		<div class="sm-card">
+			<button class="sm-back" id="otp-back-btn">← Back</button>
+			<div class="sm-progress">
+				<div class="sm-dot done"></div>
+				<div class="sm-dot active"></div>
+				<div class="sm-dot"></div>
+			</div>
+			<div class="sm-brand">
+				<h1>Verify OTP</h1>
+				<p id="otp-desc">Enter the 6-digit code sent to your email</p>
+			</div>
+			<div id="alert-otp" class="sm-alert"></div>
+			<div class="sm-otp-grid" id="otp-grid">
+				<input class="sm-otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+				<input class="sm-otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+				<input class="sm-otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+				<input class="sm-otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+				<input class="sm-otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+				<input class="sm-otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+			</div>
+			<button class="sm-btn sm-btn-primary" id="btn-verify-otp" onclick="smVerifyOtp()">
+				<span class="btn-text">Verify OTP →</span>
+			</button>
+			<div class="sm-timer-wrap">
+				<p>Resend OTP in <span id="otp-timer">4:59</span></p>
+				<button class="sm-resend-btn" id="otp-resend-btn" onclick="smResendOtp()">Resend OTP</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- ===== VIEW: SET PASSWORD ===== -->
+	<div class="sm-view" id="view-set-password">
+		<div class="sm-card">
+			<div class="sm-progress">
+				<div class="sm-dot done"></div>
+				<div class="sm-dot done"></div>
+				<div class="sm-dot active"></div>
+			</div>
+			<div class="sm-brand">
+				<h1>Set New Password</h1>
+				<p>Choose a strong password for your account</p>
+			</div>
+			<div id="alert-setpass" class="sm-alert"></div>
+			<div class="sm-form-group">
+				<label>New Password</label>
+				<div class="sm-input-wrap">
+					<input class="sm-input has-icon" type="password" id="sp-pass"
+					       placeholder="Min 6 characters" autocomplete="new-password"
+					       oninput="smStrength(this, 'sp-sbar')">
+					<button class="sm-input-icon" type="button" onclick="smTogglePass(this)" tabindex="-1">
+						<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+					</button>
+				</div>
+				<div class="sm-strength-wrap"><div class="sm-strength-bar" id="sp-sbar"></div></div>
+			</div>
+			<div class="sm-form-group">
+				<label>Confirm Password</label>
+				<div class="sm-input-wrap">
+					<input class="sm-input has-icon" type="password" id="sp-confirm"
+					       placeholder="Re-enter password" autocomplete="new-password">
+					<button class="sm-input-icon" type="button" onclick="smTogglePass(this)" tabindex="-1">
+						<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+					</button>
+				</div>
+			</div>
+			<button class="sm-btn sm-btn-primary" id="btn-setpass" onclick="smSetPassword()">
+				<span class="btn-text">Complete Registration 🎉</span>
+			</button>
+		</div>
+	</div>
+
+	<!-- ===== VIEW: VENDOR SIGNUP ===== -->
+	<div class="sm-view" id="view-vendor-signup">
+		<div class="sm-card">
+			<button class="sm-back" onclick="smGoto('view-role-select')">← Back</button>
+			<div class="sm-progress">
+				<div class="sm-dot active"></div>
+				<div class="sm-dot"></div>
+				<div class="sm-dot"></div>
+			</div>
+			<div class="sm-brand">
+				<h1>Vendor Portal</h1>
+				<p>Register your vendor access</p>
+			</div>
+			<div id="alert-v-signup" class="sm-alert"></div>
+			<div class="sm-info-box">
+				🔐 Use your existing system credentials to activate vendor portal access. Your email and current system password will be verified before proceeding.
+			</div>
+			<div class="sm-form-group">
+				<label>System Email</label>
+				<input class="sm-input" type="email" id="v-email" placeholder="vendor@company.com" autocomplete="email">
+			</div>
+			<div class="sm-form-group">
+				<label>Current System Password</label>
+				<div class="sm-input-wrap">
+					<input class="sm-input has-icon" type="password" id="v-password"
+					       placeholder="Your existing system password" autocomplete="current-password">
+					<button class="sm-input-icon" type="button" onclick="smTogglePass(this)" tabindex="-1">
+						<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+					</button>
+				</div>
+			</div>
+			<button class="sm-btn sm-btn-primary" id="btn-v-signup" onclick="smVendorSignup()">
+				<span class="btn-text">Verify & Send OTP →</span>
+			</button>
+			<div class="sm-switch">Already registered? <a onclick="smGotoSignin('vendor')">Sign In</a></div>
+		</div>
+	</div>
+
+	<!-- ===== VIEW: SIGN IN ===== -->
+	<div class="sm-view" id="view-signin">
+		<div class="sm-card">
+			<button class="sm-back" onclick="smGoto('view-role-select')">← Back</button>
+			<div class="sm-brand">
+				<h1>Welcome Back</h1>
+				<p id="signin-subtitle">Sign in to your account</p>
+			</div>
+			<div id="alert-signin" class="sm-alert"></div>
+			<div class="sm-form-group">
+				<label>Email Address</label>
+				<input class="sm-input" type="email" id="si-email" placeholder="your@email.com" autocomplete="email">
+			</div>
+			<div class="sm-form-group">
+				<label>Password</label>
+				<div class="sm-input-wrap">
+					<input class="sm-input has-icon" type="password" id="si-password"
+					       placeholder="Your password" autocomplete="current-password"
+					       onkeydown="if(event.key==='Enter') smSignIn()">
+					<button class="sm-input-icon" type="button" onclick="smTogglePass(this)" tabindex="-1">
+						<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+					</button>
+				</div>
+			</div>
+			<button class="sm-btn sm-btn-primary" id="btn-signin" onclick="smSignIn()">
+				<span class="btn-text">Sign In →</span>
+			</button>
+			<div class="sm-switch">New here? <a onclick="smGoto('view-role-select')">Create Account</a></div>
+		</div>
+	</div>
+
+	<!-- ===== VIEW: SUCCESS ===== -->
+	<div class="sm-view" id="view-success">
+		<div class="sm-card sm-success-wrap">
+			<div class="sm-success-icon">✓</div>
+			<div class="sm-success-title" id="success-title">Account Ready!</div>
+			<div class="sm-success-msg" id="success-msg">
+				Welcome to Smart Market.<br>Redirecting you to the dashboard...
+			</div>
+			<button class="sm-btn sm-btn-primary" onclick="window.location.href='/'">
+				<span class="btn-text">Go to Dashboard →</span>
+			</button>
+		</div>
+	</div>
+
+</div><!-- end .sm-wrap -->
+
+
+<script>
+// ==================== STATE ====================
+var SM = { action: 'signup', role: '', email: '', otpTimer: null, resendFn: null };
+
+// ==================== NAVIGATION ====================
+function smGoto(id) {
+	document.querySelectorAll('.sm-view').forEach(function(v) { v.classList.remove('active'); });
+	var el = document.getElementById(id);
+	if (el) el.classList.add('active');
+}
+
+function smShowRoleSelect(action) {
+	SM.action = action;
+	document.getElementById('role-title').textContent = action === 'signup' ? 'Create Account' : 'Sign In';
+	document.getElementById('role-subtitle').textContent = action === 'signup'
+		? 'What kind of account do you need?'
+		: 'How would you like to sign in?';
+	smGoto('view-role-select');
+}
+
+function smChooseRole(role) {
+	SM.role = role;
+	if (SM.action === 'signin') {
+		document.getElementById('signin-subtitle').textContent =
+			role === 'vendor' ? 'Vendor Portal Sign In' : 'Customer Sign In';
+		smGoto('view-signin');
+	} else {
+		smGoto(role === 'customer' ? 'view-customer-signup' : 'view-vendor-signup');
+	}
+}
+
+function smGotoSignin(role) {
+	SM.role = role;
+	SM.action = 'signin';
+	document.getElementById('signin-subtitle').textContent =
+		role === 'vendor' ? 'Vendor Portal Sign In' : 'Customer Sign In';
+	smGoto('view-signin');
+}
+
+// ==================== HELPERS ====================
+function smAlert(id, msg, type) {
+	var el = document.getElementById(id);
+	if (!el) return;
+	el.className = 'sm-alert ' + (type || 'error');
+	el.textContent = msg;
+}
+
+function smClear(id) {
+	var el = document.getElementById(id);
+	if (el) el.className = 'sm-alert';
+}
+
+function smLoading(id, on) {
+	var el = document.getElementById(id);
+	if (!el) return;
+	if (on) el.classList.add('loading'); else el.classList.remove('loading');
+}
+
+function smTogglePass(btn) {
+	var inp = btn.closest('.sm-input-wrap').querySelector('.sm-input');
+	var isPass = inp.type === 'password';
+	inp.type = isPass ? 'text' : 'password';
+	btn.innerHTML = isPass
+		? '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+		: '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+}
+
+function smStrength(inp, barId) {
+	var v = inp.value;
+	var bar = document.getElementById(barId);
+	if (!bar) return;
+	var score = 0;
+	if (v.length >= 6)  score++;
+	if (v.length >= 10) score++;
+	if (/[A-Z]/.test(v)) score++;
+	if (/[0-9]/.test(v)) score++;
+	if (/[^a-zA-Z0-9]/.test(v)) score++;
+	var colors = ['#ef4444','#f97316','#eab308','#22c55e','#00f5a0'];
+	bar.style.width  = (score * 20) + '%';
+	bar.style.background = colors[score - 1] || 'transparent';
+}
+
+// ==================== API ====================
+function smCsrf() {
+	var m = document.cookie.match(/csrftoken=([^;]+)/);
+	return m ? m[1] : (window.frappe && frappe.csrf_token ? frappe.csrf_token : '');
+}
+
+async function smCall(method, data) {
+	var res = await fetch('/api/method/' + method, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-Frappe-CSRF-Token': smCsrf()
+		},
+		body: JSON.stringify(data)
+	});
+	var json = await res.json();
+	return json.message !== undefined ? json.message : json;
+}
+
+// ==================== OTP ====================
+function smInitOtpInputs() {
+	var inputs = Array.from(document.querySelectorAll('.sm-otp-digit'));
+	inputs.forEach(function(inp, i) {
+		inp.value = '';
+		inp.classList.remove('filled');
+
+		inp.oninput = function(e) {
+			var val = e.target.value.replace(/\D/g, '');
+			e.target.value = val.slice(0, 1);
+			if (val) {
+				e.target.classList.add('filled');
+				if (i < inputs.length - 1) inputs[i + 1].focus();
+			} else {
+				e.target.classList.remove('filled');
+			}
+		};
+		inp.onkeydown = function(e) {
+			if (e.key === 'Backspace' && !inp.value && i > 0) {
+				inputs[i - 1].focus();
+				inputs[i - 1].value = '';
+				inputs[i - 1].classList.remove('filled');
+			}
+			if (e.key === 'Enter') smVerifyOtp();
+		};
+		inp.onpaste = function(e) {
+			e.preventDefault();
+			var paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+			paste.split('').forEach(function(c, j) {
+				if (inputs[i + j]) {
+					inputs[i + j].value = c;
+					inputs[i + j].classList.add('filled');
+				}
+			});
+			var nextIdx = Math.min(i + paste.length, inputs.length - 1);
+			if (inputs[nextIdx]) inputs[nextIdx].focus();
+		};
+	});
+	setTimeout(function() { if (inputs[0]) inputs[0].focus(); }, 100);
+}
+
+function smGetOtpValue() {
+	return Array.from(document.querySelectorAll('.sm-otp-digit')).map(function(i) { return i.value; }).join('');
+}
+
+function smStartTimer(resendFn) {
+	clearInterval(SM.otpTimer);
+	SM.resendFn = resendFn;
+	var timerEl  = document.getElementById('otp-timer');
+	var resendBtn = document.getElementById('otp-resend-btn');
+	if (timerEl)  timerEl.parentElement.style.display = 'block';
+	if (resendBtn) resendBtn.style.display = 'none';
+
+	var secs = 299;
+	SM.otpTimer = setInterval(function() {
+		if (secs <= 0) {
+			clearInterval(SM.otpTimer);
+			if (timerEl) timerEl.parentElement.innerHTML = '';
+			if (resendBtn) { resendBtn.style.display = 'block'; }
+			return;
+		}
+		secs--;
+		var m = Math.floor(secs / 60);
+		var s = secs % 60;
+		if (timerEl) timerEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+	}, 1000);
+}
+
+function smResendOtp() {
+	if (SM.resendFn) SM.resendFn();
+}
+
+// ==================== CUSTOMER SIGNUP ====================
+async function smCustomerSignup() {
+	smClear('alert-c-signup');
+	var name  = document.getElementById('c-fullname').value.trim();
+	var email = document.getElementById('c-email').value.trim();
+	var phone = document.getElementById('c-phone').value.trim();
+	var pass  = document.getElementById('c-password').value;
+
+	if (!name)              return smAlert('alert-c-signup', '⚠ Full name is required');
+	if (!email || !email.includes('@')) return smAlert('alert-c-signup', '⚠ Valid email address is required');
+	if (!phone)             return smAlert('alert-c-signup', '⚠ Phone number is required');
+	if (!pass || pass.length < 6)       return smAlert('alert-c-signup', '⚠ Password must be at least 6 characters');
+
+	smLoading('btn-c-signup', true);
+	try {
+		var res = await smCall('smart_market.auth_api.send_customer_otp', {
+			full_name: name, email: email, phone: phone, password: pass
+		});
+		if (res.success) {
+			SM.email = email;
+			document.getElementById('otp-desc').textContent = 'Enter the 6-digit code sent to ' + email;
+			document.getElementById('otp-back-btn').onclick = function() { smGoto('view-customer-signup'); };
+			smGoto('view-otp');
+			smInitOtpInputs();
+			smStartTimer(function() { smCustomerSignup(); });
+		} else {
+			smAlert('alert-c-signup', '⚠ ' + (res.message || 'Failed to send OTP. Please try again.'));
+		}
+	} catch(e) {
+		smAlert('alert-c-signup', '⚠ Network error. Please check your connection.');
+	}
+	smLoading('btn-c-signup', false);
+}
+
+// ==================== VENDOR SIGNUP ====================
+async function smVendorSignup() {
+	smClear('alert-v-signup');
+	var email = document.getElementById('v-email').value.trim();
+	var pass  = document.getElementById('v-password').value;
+
+	if (!email || !email.includes('@')) return smAlert('alert-v-signup', '⚠ Valid email is required');
+	if (!pass)  return smAlert('alert-v-signup', '⚠ Password is required');
+
+	smLoading('btn-v-signup', true);
+	try {
+		var res = await smCall('smart_market.auth_api.send_vendor_otp', { email: email, password: pass });
+		if (res.success) {
+			SM.email = email;
+			document.getElementById('otp-desc').textContent = 'Enter the 6-digit code sent to ' + email;
+			document.getElementById('otp-back-btn').onclick = function() { smGoto('view-vendor-signup'); };
+			smGoto('view-otp');
+			smInitOtpInputs();
+			smStartTimer(function() { smVendorSignup(); });
+		} else {
+			smAlert('alert-v-signup', '⚠ ' + (res.message || 'Verification failed.'));
+		}
+	} catch(e) {
+		smAlert('alert-v-signup', '⚠ Network error. Please check your connection.');
+	}
+	smLoading('btn-v-signup', false);
+}
+
+// ==================== VERIFY OTP ====================
+async function smVerifyOtp() {
+	smClear('alert-otp');
+	var otp = smGetOtpValue();
+	if (otp.length < 6) return smAlert('alert-otp', '⚠ Please enter the complete 6-digit OTP');
+
+	smLoading('btn-verify-otp', true);
+	try {
+		var res = await smCall('smart_market.auth_api.verify_otp', { email: SM.email, otp: otp });
+		if (res.success) {
+			clearInterval(SM.otpTimer);
+			smAlert('alert-otp', '✓ OTP verified!', 'success');
+			setTimeout(function() { smGoto('view-set-password'); }, 600);
+		} else {
+			smAlert('alert-otp', '⚠ ' + (res.message || 'Invalid OTP'));
+		}
+	} catch(e) {
+		smAlert('alert-otp', '⚠ Network error. Please try again.');
+	}
+	smLoading('btn-verify-otp', false);
+}
+
+// ==================== SET PASSWORD ====================
+async function smSetPassword() {
+	smClear('alert-setpass');
+	var newPass  = document.getElementById('sp-pass').value;
+	var confirm  = document.getElementById('sp-confirm').value;
+
+	if (!newPass || newPass.length < 6) return smAlert('alert-setpass', '⚠ Password must be at least 6 characters');
+	if (newPass !== confirm)            return smAlert('alert-setpass', '⚠ Passwords do not match');
+
+	smLoading('btn-setpass', true);
+	try {
+		var res = await smCall('smart_market.auth_api.set_password_and_register', {
+			email: SM.email, new_password: newPass, confirm_password: confirm
+		});
+		if (res.success) {
+			document.getElementById('success-title').textContent =
+				SM.role === 'vendor' ? 'Vendor Account Ready! 🏪' : 'Account Created! 🎉';
+			document.getElementById('success-msg').textContent =
+				'Welcome to Smart Market! Redirecting to your dashboard in a moment...';
+			smGoto('view-success');
+			setTimeout(function() { window.location.href = res.redirect || '/'; }, 2500);
+		} else {
+			smAlert('alert-setpass', '⚠ ' + (res.message || 'Registration failed. Please try again.'));
+		}
+	} catch(e) {
+		smAlert('alert-setpass', '⚠ Network error. Please try again.');
+	}
+	smLoading('btn-setpass', false);
+}
+
+// ==================== SIGN IN ====================
+async function smSignIn() {
+	smClear('alert-signin');
+	var email = document.getElementById('si-email').value.trim();
+	var pass  = document.getElementById('si-password').value;
+
+	if (!email) return smAlert('alert-signin', '⚠ Email is required');
+	if (!pass)  return smAlert('alert-signin', '⚠ Password is required');
+
+	smLoading('btn-signin', true);
+	try {
+		var res = await fetch('/api/method/login', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'X-Frappe-CSRF-Token': smCsrf()
+			},
+			body: new URLSearchParams({ usr: email, pwd: pass })
+		});
+		var json = await res.json();
+		if (json.message === 'Logged In') {
+			window.location.href = '/';
+		} else {
+			smAlert('alert-signin', '⚠ Invalid email or password. Please try again.');
+		}
+	} catch(e) {
+		smAlert('alert-signin', '⚠ Network error. Please check your connection.');
+	}
+	smLoading('btn-signin', false);
+}
+
+// ==================== PARTICLE BACKGROUND ====================
+(function() {
+	var canvas = document.getElementById('sm-canvas');
+	if (!canvas) return;
+	var ctx = canvas.getContext('2d');
+
+	function resize() {
+		canvas.width  = window.innerWidth;
+		canvas.height = window.innerHeight;
+	}
+	resize();
+	window.addEventListener('resize', resize);
+
+	var N = Math.min(80, Math.floor(window.innerWidth / 18));
+	var pts = [];
+	for (var i = 0; i < N; i++) {
+		pts.push({
+			x:  Math.random() * canvas.width,
+			y:  Math.random() * canvas.height,
+			r:  Math.random() * 1.4 + 0.4,
+			vx: (Math.random() - 0.5) * 0.25,
+			vy: (Math.random() - 0.5) * 0.25,
+			a:  Math.random() * 0.4 + 0.15
+		});
+	}
+
+	function frame() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		for (var i = 0; i < pts.length; i++) {
+			var p = pts[i];
+			for (var j = i + 1; j < pts.length; j++) {
+				var q = pts[j];
+				var dx = p.x - q.x, dy = p.y - q.y;
+				var d  = Math.sqrt(dx * dx + dy * dy);
+				if (d < 130) {
+					ctx.beginPath();
+					ctx.strokeStyle = 'rgba(108,99,255,' + (0.12 * (1 - d / 130)).toFixed(3) + ')';
+					ctx.lineWidth = 0.6;
+					ctx.moveTo(p.x, p.y);
+					ctx.lineTo(q.x, q.y);
+					ctx.stroke();
+				}
+			}
+			ctx.beginPath();
+			ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+			ctx.fillStyle = 'rgba(108,99,255,' + p.a.toFixed(2) + ')';
+			ctx.fill();
+
+			p.x += p.vx;
+			p.y += p.vy;
+			if (p.x < 0 || p.x > canvas.width)  p.vx *= -1;
+			if (p.y < 0 || p.y > canvas.height)  p.vy *= -1;
+		}
+		requestAnimationFrame(frame);
+	}
+	frame();
+})();
+</script>
+{% endblock %}
