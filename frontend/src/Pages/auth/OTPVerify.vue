@@ -22,7 +22,10 @@ onMounted(() => {
     return
   }
   startTimer()
-  // focus first input
+  // Dev mode: auto-fill OTP if returned in response
+  if (state.devOtp && state.devOtp.length === 6) {
+    state.devOtp.split('').forEach((d, i) => { otpDigits.value[i] = d })
+  }
   setTimeout(() => { otpRefs.value[0]?.focus() }, 100)
 })
 onUnmounted(() => clearInterval(timerInterval))
@@ -170,6 +173,8 @@ async function resendOTP() {
           />
         </div>
 
+        <div v-if="state.devOtp" class="dev-notice">🛠️ Dev Mode — OTP: <strong>{{ state.devOtp }}</strong></div>
+
         <div v-if="error" class="error-box">⚠️ {{ error }}</div>
 
         <button
@@ -278,6 +283,7 @@ async function resendOTP() {
 .otp-box.error { border-color: rgba(239,68,68,0.5); animation: shake 0.3s ease; }
 @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
 
+.dev-notice { width: 100%; padding: 0.6rem 1rem; background: rgba(234,179,8,0.1); border: 1px solid rgba(234,179,8,0.3); border-radius: 10px; color: #fde047; font-size: 0.82rem; text-align: center; }
 .error-box { width: 100%; padding: 0.75rem 1rem; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; color: #fca5a5; font-size: 0.85rem; }
 
 .submit-btn {

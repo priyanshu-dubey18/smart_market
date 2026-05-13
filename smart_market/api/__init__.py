@@ -1,16 +1,13 @@
-# Copyright (c) 2026, dev_priyanshu dubey and contributors
-# For license information, please see license.txt
-
 import frappe
 from frappe import _
 from frappe.utils import getdate, nowdate
 
+
 @frappe.whitelist(allow_guest=True)
 def create_service_ticket(customer_name, machine_name, serial_number, issue_description):
-	"""Create a service ticket from frontend form"""
+	"""Create a draft service ticket from the public frontend form."""
 
 	try:
-		# Validate required fields
 		if not customer_name or not machine_name or not serial_number or not issue_description:
 			frappe.throw(_("All fields are required"))
 
@@ -19,18 +16,16 @@ def create_service_ticket(customer_name, machine_name, serial_number, issue_desc
 		serial_number = serial_number.strip()
 		issue_description = issue_description.strip()
 
-		# Check if customer exists, if not create one
 		customer = frappe.db.exists("Customer", {"customer_name": customer_name})
 		if not customer:
 			customer_doc = frappe.get_doc({
 				"doctype": "Customer",
 				"customer_name": customer_name,
-				"customer_type": "Individual"
+				"customer_type": "Individual",
 			})
 			customer_doc.insert(ignore_permissions=True)
 			customer = customer_doc.name
 
-		# Check if machine exists, if not create one
 		machine = frappe.db.exists("Machine", {"serial__number": serial_number})
 		if not machine:
 			machine_doc = frappe.get_doc({
@@ -38,7 +33,7 @@ def create_service_ticket(customer_name, machine_name, serial_number, issue_desc
 				"machine_name": machine_name,
 				"serial__number": serial_number,
 				"customer": customer,
-				"status": "Active"
+				"status": "Active",
 			})
 			machine_doc.insert(ignore_permissions=True)
 			machine = machine_doc.name
@@ -48,7 +43,6 @@ def create_service_ticket(customer_name, machine_name, serial_number, issue_desc
 		warranty_date = machine_doc.get("warranty_date")
 		under_warranty = bool(warranty_date and getdate(warranty_date) >= getdate(nowdate()))
 
-		# Keep the ticket as a draft so the manager can review and assign a technician.
 		service_ticket = frappe.get_doc({
 			"doctype": "Service Ticket",
 			"customer": customer,
@@ -59,9 +53,7 @@ def create_service_ticket(customer_name, machine_name, serial_number, issue_desc
 			"warranty_status": "Under Warranty" if under_warranty else "Out of Warranty",
 			"service_type": "Free" if under_warranty else "Paid",
 		})
-
 		service_ticket.insert(ignore_permissions=True)
-
 		frappe.db.commit()
 
 		return {
@@ -78,11 +70,11 @@ def create_service_ticket(customer_name, machine_name, serial_number, issue_desc
 		frappe.log_error(frappe.get_traceback(), "Service Ticket Validation Error")
 		return {
 			"success": False,
-			"message": str(e)
+			"message": str(e),
 		}
 	except Exception as e:
 		frappe.log_error(frappe.get_traceback(), "Service Ticket Creation Error")
 		return {
 			"success": False,
-			"message": str(e)
+			"message": str(e),
 		}

@@ -65,7 +65,7 @@
  "links": [],
  "modified": "2026-05-05 11:24:48.657395",
  "modified_by": "Administrator",
- "module": "Smart Market",
+ "module": "smart_market",
  "name": "Machine",
  "naming_rule": "By fieldname",
  "owner": "Administrator",

@@ -31,20 +31,21 @@ async function handleSubmit() {
     const res = await fetch('/api/method/smart_market.api.auth.send_otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Frappe-CSRF-Token': 'fetch' },
-      body: JSON.stringify({ medium: 'phone', contact: phone.value, purpose: 'customer_signup' })
+      body: JSON.stringify({ medium: 'email', contact: email.value, purpose: 'customer_signup' })
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.message || 'Failed to send OTP')
 
     setSignupData({
       userType: 'customer',
+      devOtp: data.dev_otp || '',
       fullName: fullName.value,
       email: email.value,
       phone: phone.value,
       password: password.value,
       otpFlow: 'signup',
-      otpContact: phone.value,
-      otpMedium: 'phone'
+      otpContact: email.value,
+      otpMedium: 'email'
     })
     router.push('/auth/otp')
   } catch (e) {
@@ -77,7 +78,7 @@ async function handleSubmit() {
             <span>👤</span> Customer Registration
           </div>
           <h1>Create Customer Account</h1>
-          <p>Fill in your details. We'll send an OTP to verify your phone number.</p>
+          <p>Fill in your details. We'll send an OTP to your email to verify your account.</p>
         </div>
 
         <form @submit.prevent="handleSubmit" class="auth-form">
@@ -107,7 +108,7 @@ async function handleSubmit() {
               <span class="input-icon">📱</span>
               <input v-model="phone" type="tel" placeholder="10-digit mobile number" autocomplete="tel" maxlength="10" />
             </div>
-            <span class="field-hint">OTP will be sent to this number</span>
+            <span class="field-hint">Phone used for account identification only</span>
           </div>
 
           <!-- Password -->

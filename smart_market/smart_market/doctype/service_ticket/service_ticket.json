@@ -118,7 +118,7 @@
  "links": [],
  "modified": "2026-05-05 12:28:05.809807",
  "modified_by": "Administrator",
- "module": "Smart Market",
+ "module": "smart_market",
  "name": "Service Ticket",
  "owner": "Administrator",
  "permissions": [

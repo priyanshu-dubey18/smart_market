@@ -146,23 +146,11 @@ after_install = "smart_market.setup.demo_data.create_demo_data"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"smart_market.tasks.all"
-# 	],
-# 	"daily": [
-# 		"smart_market.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"smart_market.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"smart_market.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"smart_market.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	"daily": [
+		"smart_market.tasks.daily"
+	],
+}
 
 # Testing
 # -------

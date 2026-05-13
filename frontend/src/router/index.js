@@ -3,6 +3,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../Pages/Home.vue'
 import About from '../Pages/About.vue'
 import ServiceRequestForm from '../Pages/ServiceRequestForm.vue'
+import CustomerDashboard from '../Pages/CustomerDashboard.vue'
+import TechnicianDashboard from '../Pages/TechnicianDashboard.vue'
 import SignUpChoice from '../Pages/auth/SignUpChoice.vue'
 import CustomerSignUp from '../Pages/auth/CustomerSignUp.vue'
 import VendorSignUp from '../Pages/auth/VendorSignUp.vue'
@@ -18,6 +20,8 @@ const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/about', name: 'About', component: About },
   { path: '/service-request', name: 'ServiceRequest', component: ServiceRequestForm },
+  { path: '/dashboard/customer', name: 'CustomerDashboard', component: CustomerDashboard },
+  { path: '/dashboard/technician', name: 'TechnicianDashboard', component: TechnicianDashboard },
 
   // Auth — Sign Up
   { path: '/signup', name: 'SignUpChoice', component: SignUpChoice },
@@ -39,7 +43,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/assets/'),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 })
 

@@ -1,47 +1,82 @@
-# Copyright (c) 2026, dev_priyanshu dubey and contributors
-# For license information, please see license.txt
-
-from pydoc import doc
-
 import frappe
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days
+from frappe.utils import flt, getdate, nowdate
 
 class ServiceTicket(Document):
+	def validate(self):
+		self.set_warranty_and_service_type()
+		self.calculate_totals()
 
-    def after_insert(self):
-        for item in self.used_parts:
-            if item.part:
+	def set_warranty_and_service_type(self):
+		if not self.machine:
+			return
 
-                machine = frappe.get_doc({
-                    "doctype": "Machine",
-                    "machine_name": item.item_name,
-                    "customer": self.customer,
-                    "purchase_date": self.creation,   # ya koi date field
-                    "warranty_expiry": add_days(self.creation, 365),
-                    "status": "Active"
-                })
+		warranty_date = frappe.db.get_value("Machine", self.machine, "warranty_date")
+		under_warranty = bool(warranty_date and getdate(warranty_date) >= getdate(nowdate()))
 
-                machine.insert(ignore_permissions=True)
+		self.warranty_status = "Under Warranty" if under_warranty else "Out of Warranty"
+		self.service_type = "Free" if under_warranty else "Paid"
 
-    def on_submit(self):
-        if not self.sales_invoice:
-            items = []
+	def calculate_totals(self):
+		total_parts_cost = 0
 
-            for d in self.used_parts:
-                items.append({
-                    "item_code": d.item,
-                    "qty": d.qty,
-                    "rate": d.rate
-                })
+		for row in self.used_parts:
+			row.qty = flt(row.qty)
+			row.rate = flt(row.rate)
+			row.amount = row.qty * row.rate
+			total_parts_cost += row.amount
 
-            invoice = frappe.get_doc({
-                "doctype": "Sales Invoice",
-                "customer": self.customer,
-                "items": items
-            })
+		self.total_parts_cost = total_parts_cost
+		self.total_cost = 0 if self.warranty_status == "Under Warranty" else total_parts_cost
 
-            invoice.insert()
-            invoice.submit()
+	def on_submit(self):
+		self.set_warranty_and_service_type()
+		self.calculate_totals()
 
-            self.sales_invoice = invoice.name
+		# Create invoice immediately if warranty has expired
+		self.create_invoice_if_warranty_expired()
+
+	def create_sales_invoice(self):
+		if not self.customer:
+			frappe.throw(_("Customer is required to create Sales Invoice."))
+
+		items = self.get_invoice_items()
+		if not items:
+			frappe.throw(_("Add at least one used part with an Item to create Sales Invoice."))
+
+		invoice = frappe.get_doc({
+			"doctype": "Sales Invoice",
+			"customer": self.customer,
+			"items": items,
+		})
+		invoice.insert(ignore_permissions=True)
+		invoice.submit()
+
+		return invoice
+
+	def create_invoice_if_warranty_expired(self):
+		"""Create sales invoice if warranty has expired and no invoice exists"""
+		if self.sales_invoice:
+			return  # Already has invoice
+
+		if self.status != "Completed":
+			return  # Not completed
+
+		if not self.machine:
+			return
+
+		warranty_date = frappe.db.get_value("Machine", self.machine, "warranty_date")
+		if not warranty_date:
+			return  # No warranty date, assume out of warranty
+
+		if getdate(warranty_date) >= getdate(nowdate()):
+			return  # Still under warranty
+
+		# Warranty expired, create invoice
+		try:
+			invoice = self.create_sales_invoice()
+			self.db_set("sales_invoice", invoice.name, update_modified=False)
+			frappe.db.commit()
+		except Exception as e:
+			frappe.log_error(f"Failed to create invoice for Service Ticket {self.name}: {str(e)}")

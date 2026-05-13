@@ -5,6 +5,6 @@
  "route": "/service-request",
  "published": 1,
  "content_type": "HTML",
- "main_section_html": "<!DOCTYPE html>\n<html lang=\"\">\n  <head>\n    <meta charset=\"UTF-8\">\n    <link rel=\"icon\" href=\"/assets/smart_market/favicon.ico\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Service Request Form</title>\n    <script type=\"module\" crossorigin src=\"/assets/smart_market/assets/index-Das9SfJE.js\"></script>\n    <link rel=\"stylesheet\" crossorigin href=\"/assets/smart_market/assets/index-CkQy1Gp9.css\">\n  </head>\n  <body>\n    <div id=\"app\"></div>\n  </body>\n</html>",
- "module": "Smart Market"
+ "main_section_html": "<!DOCTYPE html>\n<html lang=\"\">\n  <head>\n    <meta charset=\"UTF-8\">\n    <link rel=\"icon\" href=\"/assets/smart_market/favicon.ico\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Service Request Form</title>\n    <script type=\"module\" crossorigin src=\"/assets/smart_market/assets/index-BebiFsF8.js\"></script>\n    <link rel=\"stylesheet\" crossorigin href=\"/assets/smart_market/assets/index-CyajXAfe.css\">\n  </head>\n  <body>\n    <div id=\"app\"></div>\n  </body>\n</html>",
+ "module": "smart_market"
 }

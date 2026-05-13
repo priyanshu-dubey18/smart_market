@@ -14,7 +14,16 @@ export default defineConfig({
     },
   },
   base: '/assets/smart_market/',
+  build: {
+    outDir: '../smart_market/public',
+    emptyOutDir: true,
+  },
   server: {
+    watch: {
+      usePolling: true,
+      interval: 500,
+      ignored: ['**/node_modules/**', '**/dist/**', '**/.git/**'],
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

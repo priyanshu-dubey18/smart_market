@@ -38,24 +38,25 @@ async function handleSubmit() {
     if (!checkRes.ok) throw new Error(checkData.message || 'Vendor verification failed. Contact your administrator.')
     if (!checkData.message?.eligible) throw new Error('Your email is not registered in the system. Please contact the administrator.')
 
-    // Send OTP to phone
+    // Send OTP to registered email
     const otpRes = await fetch('/api/method/smart_market.api.auth.send_otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Frappe-CSRF-Token': 'fetch' },
-      body: JSON.stringify({ medium: 'phone', contact: phone.value, purpose: 'vendor_signup' })
+      body: JSON.stringify({ medium: 'email', contact: email.value, purpose: 'vendor_signup' })
     })
     const otpData = await otpRes.json()
     if (!otpRes.ok) throw new Error(otpData.message || 'Failed to send OTP')
 
     setSignupData({
       userType: 'vendor',
+      devOtp: otpData.dev_otp || '',
       fullName: fullName.value,
       email: email.value,
       phone: phone.value,
       password: password.value,
       otpFlow: 'signup',
-      otpContact: phone.value,
-      otpMedium: 'phone'
+      otpContact: email.value,
+      otpMedium: 'email'
     })
     router.push('/auth/otp')
   } catch (e) {
@@ -121,7 +122,7 @@ async function handleSubmit() {
               <span class="input-icon">📱</span>
               <input v-model="phone" type="tel" placeholder="10-digit mobile number" maxlength="10" />
             </div>
-            <span class="field-hint">OTP will be sent to this number</span>
+            <span class="field-hint">Phone used for account identification only</span>
           </div>
 
           <div class="field-group">

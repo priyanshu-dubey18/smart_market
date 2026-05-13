@@ -1,16 +1,17 @@
 import { reactive } from 'vue'
 
 const state = reactive({
-  userType: '',       // 'customer' | 'vendor'
+  userType: '',
   fullName: '',
   email: '',
   phone: '',
   password: '',
-  otpFlow: '',        // 'signup' | 'reset-email' | 'reset-password'
-  otpContact: '',     // email or phone shown in OTP screen
-  otpMedium: '',      // 'phone' | 'email'
+  otpFlow: '',
+  otpContact: '',
+  otpMedium: '',
   verifiedOtp: false,
   loggedInUser: null,
+  devOtp: '',
 })
 
 function setSignupData(data) {
